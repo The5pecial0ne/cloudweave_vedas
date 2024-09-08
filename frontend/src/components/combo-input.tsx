@@ -21,15 +21,17 @@ import {
 
 export function ComboInput({
   data,
+  defaultValue = "",
   onValueChange,
   type = 'item',
 }: {
   data: { label: string; value: string }[];
+  defaultValue?: string,
   onValueChange?: (value: string) => void;
   type?: string;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(defaultValue);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

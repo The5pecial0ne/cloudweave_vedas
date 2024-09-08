@@ -18,12 +18,13 @@ export default function PlaygroundPage() {
   const [lng, setLng] = useState(77.7069);
   const [lat, setLat] = useState(22.2723);
   const [zoom, setZoom] = useState(4.07);
+  const [baseMap, setBaseMap] = useState("mapbox://styles/mapbox/streets-v12");
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: baseMap,
       center: [lng, lat],
       zoom: zoom,
       testMode: true,
@@ -38,7 +39,7 @@ export default function PlaygroundPage() {
       setLat(map.current.getCenter().lat.toFixed(4));
       setZoom(map.current.getZoom().toFixed(2));
     });
-  });
+  }, []);
 
   return (
     <div className="h-screen">
@@ -76,11 +77,20 @@ export default function PlaygroundPage() {
 
                     <ComboInput
                       data={[
-                        { label: "Mapbox", value: "mapbox" },
-                        { label: "Google Maps", value: "google-maps" },
-                        { label: "OpenStreetMap", value: "openstreetmap" },
+                        { label: "Street", value: "mapbox://styles/mapbox/streets-v12" },
+                        { label: "Satellite", value: "mapbox://styles/mapbox/satellite-v9" },
+                        { label: "Satellite Streets", value: "mapbox://styles/mapbox/satellite-streets-v11" },
+                        { label: "Dark", value: "mapbox://styles/mapbox/dark-v10" },
+                        { label: "Light", value: "mapbox://styles/mapbox/light-v10" },
+                        { label: "Outdoors", value: "mapbox://styles/mapbox/outdoors-v11" },
+                        { label: "Navigation", value: "mapbox://styles/mapbox/navigation-guidance-day-v4" },
                       ]}
                       type="base map"
+                      defaultValue={baseMap}
+                      onValueChange={(value) => {
+                        setBaseMap(value);
+                        map.current.setStyle(value);
+                      }}
                     />
                   </div>
 
