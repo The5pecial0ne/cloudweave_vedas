@@ -4,7 +4,7 @@ import { CounterClockwiseClockIcon } from "@radix-ui/react-icons"
 
 import { CodeViewer } from "@/components/playground/code-viewer"
 import { MaxLengthSelector } from "@/components/playground/maxlength-selector"
-import { ModelSelector } from "@/components/playground/model-selector"
+import { SatelliteSelector } from "@/components/playground/model-selector"
 import { PresetActions } from "@/components/playground/preset-actions"
 import { PresetSave } from "@/components/playground/preset-save"
 import { PresetSelector } from "@/components/playground/preset-selector"
@@ -239,7 +239,7 @@ export default function PlaygroundPage() {
                     </TabsTrigger>
                   </TabsList>
                 </div>
-                <ModelSelector types={types} models={models} />
+                <SatelliteSelector types={types} models={models} />
                 <TemperatureSelector defaultValue={[0.56]} />
                 <MaxLengthSelector defaultValue={[256]} />
                 <TopPSelector defaultValue={[0.9]} />

@@ -17,24 +17,23 @@ interface ModelSelectorProps extends PopoverProps {
   models: Model[]
 }
 
-export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
+export function SatelliteSelector({ models, types, ...props }: ModelSelectorProps) {
   const [open, setOpen] = React.useState(false)
-  const [selectedModel, setSelectedModel] = React.useState<Model>(models[0])
-  const [peekedModel, setPeekedModel] = React.useState<Model>(models[0])
+  const [selectedSatellite, setSelectedSatellite] = React.useState<Model>(models[0])
+  const [peekedSatellite, setPeekedSatellite] = React.useState<Model>(models[0])
 
   return (
     <div className="grid gap-2">
       <HoverCard openDelay={200}>
         <HoverCardTrigger asChild>
-          <Label htmlFor="model">Model</Label>
+          <Label htmlFor="model">Satellite</Label>
         </HoverCardTrigger>
         <HoverCardContent
           align="start"
           className="w-[260px] text-sm"
           side="left"
         >
-          The model which will generate the completion. Some models are suitable
-          for natural language tasks, others specialize in code. Learn more.
+          The satellite whose data you want to use.
         </HoverCardContent>
       </HoverCard>
       <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -46,7 +45,7 @@ export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
             aria-label="Select a model"
             className="w-full justify-between"
           >
-            {selectedModel ? selectedModel.name : "Select a model..."}
+            {selectedSatellite ? selectedSatellite.name : "Select a model..."}
             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -59,17 +58,17 @@ export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
               className="min-h-[280px]"
             >
               <div className="grid gap-2">
-                <h4 className="font-medium leading-none">{peekedModel.name}</h4>
+                <h4 className="font-medium leading-none">{peekedSatellite.name}</h4>
                 <div className="text-sm text-muted-foreground">
-                  {peekedModel.description}
+                  {peekedSatellite.description}
                 </div>
-                {peekedModel.strengths ? (
+                {peekedSatellite.strengths ? (
                   <div className="mt-4 grid gap-2">
                     <h5 className="text-sm font-medium leading-none">
                       Strengths
                     </h5>
                     <ul className="text-sm text-muted-foreground">
-                      {peekedModel.strengths}
+                      {peekedSatellite.strengths}
                     </ul>
                   </div>
                 ) : null}
@@ -77,8 +76,8 @@ export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
             </HoverCardContent>
             <Command loop>
               <CommandList className="h-[var(--cmdk-list-height)] max-h-[400px]">
-                <CommandInput placeholder="Search Models..." />
-                <CommandEmpty>No Models found.</CommandEmpty>
+                <CommandInput placeholder="Search Satellite..." />
+                <CommandEmpty>No Sateliite found.</CommandEmpty>
                 <HoverCardTrigger />
                 {types.map((type) => (
                   <CommandGroup key={type} heading={type}>
@@ -88,10 +87,10 @@ export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
                         <ModelItem
                           key={model.id}
                           model={model}
-                          isSelected={selectedModel?.id === model.id}
-                          onPeek={(model) => setPeekedModel(model)}
+                          isSelected={selectedSatellite?.id === model.id}
+                          onPeek={(model) => setPeekedSatellite(model)}
                           onSelect={() => {
-                            setSelectedModel(model)
+                            setSelectedSatellite(model)
                             setOpen(false)
                           }}
                         />
