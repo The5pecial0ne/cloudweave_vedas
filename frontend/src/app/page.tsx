@@ -1,17 +1,45 @@
 "use client";
 
-import { CodeViewer } from "@/components/playground/code-viewer";
-import { PresetShare } from "@/components/playground/preset-share";
+import mapboxgl from "mapbox-gl";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { LocateIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { ComboInput } from "@/components/combo-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEffect, useRef, useState } from "react";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!;
 
 export default function PlaygroundPage() {
+  const mapContainer = useRef<any>(null);
+  const map = useRef<any>(null);
+  const [lng, setLng] = useState(77.7069);
+  const [lat, setLat] = useState(22.2723);
+  const [zoom, setZoom] = useState(4.07);
+
+  useEffect(() => {
+    if (map.current) return; // initialize map only once
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [lng, lat],
+      zoom: zoom,
+      testMode: true,
+    });
+
+    map.current.on('load', function () {
+        map.current.resize();
+    });
+
+    map.current.on('move', () => {
+      setLng(map.current.getCenter().lng.toFixed(4));
+      setLat(map.current.getCenter().lat.toFixed(4));
+      setZoom(map.current.getZoom().toFixed(2));
+    });
+  });
+
   return (
     <div className="h-screen">
       <div className="hidden h-full flex-col md:flex">
@@ -28,15 +56,17 @@ export default function PlaygroundPage() {
 
         <Separator />
 
-        <div className="flex-1 grid grid-cols-[1fr_230px] p-8 py-6 gap-8">
-          <div className="flex flex-1 h-full flex-col space-y-4">
-            <Textarea
-              placeholder="Write a tagline for an ice cream shop"
-              className="min-h-[400px] flex-1 p-4 md:min-h-[700px] lg:min-h-[700px] resize-none"
+        <div className="flex-1 flex p-8 py-6 gap-8">
+          <div
+            className="h-[800px] w-full flex-1 overflow-hidden rounded-lg shadow-md bg-white"
+          >
+            <div
+              className="h-full w-full"
+              ref={mapContainer}
             />
           </div>
 
-          <Tabs defaultValue="complete">
+          <Tabs defaultValue="complete" className="flex-shrink-0">
             <div className="h-full">
               <div className="grid h-full items-stretch gap-6">
                 <div className="flex-col gap-y-2 sm:flex md:order-2">
@@ -99,7 +129,8 @@ export default function PlaygroundPage() {
                       type="text"
                       id="latitude"
                       className="input"
-                      placeholder="43.12"
+                      value={lat}
+                      readOnly
                     />
 
                     <Label htmlFor="longitude">Longitude</Label>
@@ -107,7 +138,17 @@ export default function PlaygroundPage() {
                       type="text"
                       id="longitude"
                       className="input"
-                      placeholder="83.21"
+                      value={lng}
+                      readOnly
+                    />
+
+                    <Label htmlFor="zoom">Zoom</Label>
+                    <Input
+                      type="text"
+                      id="zoom"
+                      className="input"
+                      value={zoom}
+                      readOnly
                     />
                   </div>
                 </div>
