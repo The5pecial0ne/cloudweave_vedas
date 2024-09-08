@@ -21,6 +21,7 @@ export default function PlaygroundPage() {
   const [lat, setLat] = useState(22.2723);
   const [zoom, setZoom] = useState(4.07);
   const [baseMap, setBaseMap] = useState("mapbox://styles/mapbox/streets-v12");
+  const [video, setVideo] = useState("");
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -63,10 +64,22 @@ export default function PlaygroundPage() {
           <div
             className="h-[800px] w-full flex-1 overflow-hidden rounded-lg shadow-md bg-white"
           >
-            <div
-              className="h-full w-full"
-              ref={mapContainer}
-            />
+            {!video && (
+              <div
+                className="h-full w-full"
+                ref={mapContainer}
+              />
+            )}
+
+            {video && (
+              <video
+                className="h-full w-full"
+                src={video}
+                autoPlay
+                loop
+                muted
+              />
+            )}
           </div>
 
           <Tabs defaultValue="complete" className="flex-shrink-0">
@@ -115,10 +128,11 @@ export default function PlaygroundPage() {
 
                     <ComboInput
                       data={[
-                        { label: "None", value: "none" },
-                        { label: "Cloud Coverage", value: "cloud" },
+                        { label: "None", value: "" },
+                        { label: "Cyclone Maharashtra", value: "/IMG_8376.MP4" },
+                        { label: "Day Timelapse", value: "/IMG_8377.MP4"}
                       ]}
-                      onValueChange={(value) => console.log(value)}
+                      onValueChange={(value) => setVideo(value)}
                       type="overlay"
                     />
                   </div>
