@@ -13,7 +13,9 @@ import { useEffect, useRef, useState } from "react";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!;
 
 export default function PlaygroundPage() {
+  // eslint-disable-next-line
   const mapContainer = useRef<any>(null);
+  // eslint-disable-next-line
   const map = useRef<any>(null);
   const [lng, setLng] = useState(77.7069);
   const [lat, setLat] = useState(22.2723);
@@ -100,9 +102,9 @@ export default function PlaygroundPage() {
 
                     <ComboInput
                       data={[
-                        { label: "Satellite 1", value: "satellite-1" },
-                        { label: "Satellite 2", value: "satellite-2" },
+                        { label: "INSAT-3D", value: "INSAT-3D" },
                       ]}
+                      defaultValue={"INSAT-3D"}
                       type="satellite"
                     />
                   </div>
