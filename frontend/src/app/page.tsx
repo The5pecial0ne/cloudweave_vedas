@@ -21,7 +21,6 @@ export default function PlaygroundPage() {
   const [lat, setLat] = useState(22.2723);
   const [zoom, setZoom] = useState(4.07);
   const [baseMap, setBaseMap] = useState("mapbox://styles/mapbox/streets-v12");
-  const [video, setVideo] = useState("");
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -173,10 +172,7 @@ export default function PlaygroundPage() {
                         },
                         { label: "Hourly Timelapse", value: "/IMG_8377.MP4" },
                       ]}
-                      onValueChange={(value) => {
-                        setVideo(value)
-                        handleVideoOverlayChange(value)
-                      }}
+                      onValueChange={handleVideoOverlayChange}
                       type="overlay"
                     />
                   </div>
