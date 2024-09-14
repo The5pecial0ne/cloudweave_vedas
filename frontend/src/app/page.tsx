@@ -1,6 +1,6 @@
 "use client";
 
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { Map } from "mapbox-gl";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocateIcon } from "lucide-react";
@@ -16,7 +16,7 @@ export default function PlaygroundPage() {
   // eslint-disable-next-line
   const mapContainer = useRef<any>(null);
   // eslint-disable-next-line
-  const map = useRef<any>(null);
+  const map = useRef<Map | null>(null);
   const [lng, setLng] = useState(77.7069);
   const [lat, setLat] = useState(22.2723);
   const [zoom, setZoom] = useState(4.07);
@@ -33,16 +33,51 @@ export default function PlaygroundPage() {
       testMode: true,
     });
 
-    map.current.on('load', function () {
-        map.current.resize();
+    map.current.on("load", function () {
+      map.current?.resize();
     });
 
-    map.current.on('move', () => {
-      setLng(map.current.getCenter().lng.toFixed(4));
-      setLat(map.current.getCenter().lat.toFixed(4));
-      setZoom(map.current.getZoom().toFixed(2));
+    map.current.on("move", () => {
+      setLng(Number(map.current?.getCenter().lng.toFixed(4)));
+      setLat(Number(map.current?.getCenter().lat.toFixed(4)));
+      setZoom(Number(map.current?.getZoom().toFixed(2)));
     });
   }, []);
+
+  function handleVideoOverlayChange(value: string) {
+    // remove existing video overlay
+    if (map.current?.getLayer("video")) {
+      map.current?.removeLayer("video");
+      map.current?.removeSource("video");
+    }
+
+    if (!value) return;
+
+    map.current?.addSource("video", {
+      type: "video",
+      urls: [value],
+      coordinates: [
+        [44, 45],
+        [109, 45],
+        [109, -11],
+        [44, -11],
+      ],
+    });
+
+    map.current?.addLayer({
+      id: "video",
+      source: "video",
+      type: "raster",
+      layout: {
+        visibility: "visible",
+        "icon-image": "video",
+        "icon-size": 0.5,
+        "icon-allow-overlap": true,
+      },
+    });
+
+    // map.current?.setPaintProperty("video", "raster-opacity", 0.5);
+  }
 
   return (
     <div className="h-screen">
@@ -61,25 +96,8 @@ export default function PlaygroundPage() {
         <Separator />
 
         <div className="flex-1 flex p-8 py-6 gap-8">
-          <div
-            className="h-[800px] w-full flex-1 overflow-hidden rounded-lg shadow-md bg-white"
-          >
-            {!video && (
-              <div
-                className="h-full w-full"
-                ref={mapContainer}
-              />
-            )}
-
-            {video && (
-              <video
-                className="h-full w-full"
-                src={video}
-                autoPlay
-                loop
-                muted
-              />
-            )}
+          <div className="w-full flex-1 overflow-hidden rounded-lg bg-white relative">
+            <div className="h-full w-full" ref={mapContainer} id="map" />
           </div>
 
           <Tabs defaultValue="complete" className="flex-shrink-0">
@@ -92,19 +110,41 @@ export default function PlaygroundPage() {
 
                     <ComboInput
                       data={[
-                        { label: "Street", value: "mapbox://styles/mapbox/streets-v12" },
-                        { label: "Satellite", value: "mapbox://styles/mapbox/satellite-v9" },
-                        { label: "Satellite Streets", value: "mapbox://styles/mapbox/satellite-streets-v11" },
-                        { label: "Dark", value: "mapbox://styles/mapbox/dark-v10" },
-                        { label: "Light", value: "mapbox://styles/mapbox/light-v10" },
-                        { label: "Outdoors", value: "mapbox://styles/mapbox/outdoors-v11" },
-                        { label: "Navigation", value: "mapbox://styles/mapbox/navigation-guidance-day-v4" },
+                        {
+                          label: "Street",
+                          value: "mapbox://styles/mapbox/streets-v12",
+                        },
+                        {
+                          label: "Satellite",
+                          value: "mapbox://styles/mapbox/satellite-v9",
+                        },
+                        {
+                          label: "Satellite Streets",
+                          value: "mapbox://styles/mapbox/satellite-streets-v11",
+                        },
+                        {
+                          label: "Dark",
+                          value: "mapbox://styles/mapbox/dark-v10",
+                        },
+                        {
+                          label: "Light",
+                          value: "mapbox://styles/mapbox/light-v10",
+                        },
+                        {
+                          label: "Outdoors",
+                          value: "mapbox://styles/mapbox/outdoors-v11",
+                        },
+                        {
+                          label: "Navigation",
+                          value:
+                            "mapbox://styles/mapbox/navigation-guidance-day-v4",
+                        },
                       ]}
                       type="base map"
                       defaultValue={baseMap}
                       onValueChange={(value) => {
                         setBaseMap(value);
-                        map.current.setStyle(value);
+                        map.current?.setStyle(value);
                       }}
                     />
                   </div>
@@ -114,9 +154,7 @@ export default function PlaygroundPage() {
                     <div className="h-1" />
 
                     <ComboInput
-                      data={[
-                        { label: "INSAT-3D", value: "INSAT-3D" },
-                      ]}
+                      data={[{ label: "INSAT-3D", value: "INSAT-3D" }]}
                       defaultValue={"INSAT-3D"}
                       type="satellite"
                     />
@@ -129,10 +167,16 @@ export default function PlaygroundPage() {
                     <ComboInput
                       data={[
                         { label: "None", value: "" },
-                        { label: "Cyclone Maharashtra", value: "/IMG_8376.MP4" },
-                        { label: "Day Timelapse", value: "/IMG_8377.MP4"}
+                        {
+                          label: "Cyclone Maharashtra",
+                          value: "/IMG_8376.MP4",
+                        },
+                        { label: "Hourly Timelapse", value: "/IMG_8377.MP4" },
                       ]}
-                      onValueChange={(value) => setVideo(value)}
+                      onValueChange={(value) => {
+                        setVideo(value)
+                        handleVideoOverlayChange(value)
+                      }}
                       type="overlay"
                     />
                   </div>
