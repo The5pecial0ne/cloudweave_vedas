@@ -1,6 +1,5 @@
 "use client";
 
-import mapboxgl, { Map } from "mapbox-gl";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocateIcon } from "lucide-react";
@@ -8,75 +7,28 @@ import { Label } from "@/components/ui/label";
 import { ComboInput } from "@/components/combo-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect, useRef, useState } from "react";
-
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!;
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import SelectArea from "@/components/select-area";
+import { Map } from "leaflet";
 
 export default function PlaygroundPage() {
-  // eslint-disable-next-line
-  const mapContainer = useRef<any>(null);
-  // eslint-disable-next-line
-  const map = useRef<Map | null>(null);
-  const [lng, setLng] = useState(77.7069);
-  const [lat, setLat] = useState(22.2723);
+  const [map, setMap] = useState<Map | null>(null);
+
+  const [lng, setLng] = useState<string | number>(77.7069);
+  const [lat, setLat] = useState<string | number>(22.2723);
   const [zoom, setZoom] = useState(4.07);
-  const [baseMap, setBaseMap] = useState("mapbox://styles/mapbox/streets-v12");
 
   useEffect(() => {
-    if (map.current) return; // initialize map only once
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: baseMap,
-      center: [lng, lat],
-      zoom: zoom,
-      testMode: true,
-    });
-
-    map.current.on("load", function () {
-      map.current?.resize();
-    });
-
-    map.current.on("move", () => {
-      setLng(Number(map.current?.getCenter().lng.toFixed(4)));
-      setLat(Number(map.current?.getCenter().lat.toFixed(4)));
-      setZoom(Number(map.current?.getZoom().toFixed(2)));
-    });
-  }, []);
-
-  function handleVideoOverlayChange(value: string) {
-    // remove existing video overlay
-    if (map.current?.getLayer("video")) {
-      map.current?.removeLayer("video");
-      map.current?.removeSource("video");
+    if (map) {
+      map.on("move", () => {
+        setLat(map.getCenter().lat.toFixed(4));
+        setLng(map.getCenter().lng.toFixed(4));
+        setZoom(map.getZoom());
+      });
     }
-
-    if (!value) return;
-
-    map.current?.addSource("video", {
-      type: "video",
-      urls: [value],
-      coordinates: [
-        [44, 45],
-        [109, 45],
-        [109, -11],
-        [44, -11],
-      ],
-    });
-
-    map.current?.addLayer({
-      id: "video",
-      source: "video",
-      type: "raster",
-      layout: {
-        visibility: "visible",
-        "icon-image": "video",
-        "icon-size": 0.5,
-        "icon-allow-overlap": true,
-      },
-    });
-
-    // map.current?.setPaintProperty("video", "raster-opacity", 0.5);
-  }
+  }, [map]);
 
   return (
     <div className="h-screen">
@@ -95,8 +47,34 @@ export default function PlaygroundPage() {
         <Separator />
 
         <div className="flex-1 flex p-8 py-6 gap-8">
-          <div className="w-full flex-1 overflow-hidden rounded-lg bg-white relative">
-            <div className="h-full w-full" ref={mapContainer} id="map" />
+          <div className="w-full flex-1 overflow-hidden rounded-lg bg-white relative flex">
+            <MapContainer
+              center={[22.2723, 77.7069]}
+              zoom={5}
+              scrollWheelZoom={true}
+              className="flex-1"
+              ref={setMap}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={[51.505, -0.09]}>
+                <Popup>
+                  A pretty CSS3 popup. <br /> Easily customizable.
+                </Popup>
+              </Marker>
+              <SelectArea
+                onBoundsChange={(bounds) => {
+                  console.log("Selected Area:", bounds);
+                }}
+                keepRectangle={true}
+                options={{
+                  color: "red",
+                  dashArray: "5, 5",
+                }}
+              />
+            </MapContainer>
           </div>
 
           <Tabs defaultValue="complete" className="flex-shrink-0">
@@ -140,11 +118,6 @@ export default function PlaygroundPage() {
                         },
                       ]}
                       type="base map"
-                      defaultValue={baseMap}
-                      onValueChange={(value) => {
-                        setBaseMap(value);
-                        map.current?.setStyle(value);
-                      }}
                     />
                   </div>
 
@@ -172,7 +145,6 @@ export default function PlaygroundPage() {
                         },
                         { label: "Hourly Timelapse", value: "/IMG_8377.MP4" },
                       ]}
-                      onValueChange={handleVideoOverlayChange}
                       type="overlay"
                     />
                   </div>
