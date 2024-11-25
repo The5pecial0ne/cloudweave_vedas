@@ -1,5 +1,3 @@
-"use client";
-
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocateIcon } from "lucide-react";
@@ -8,8 +6,11 @@ import { ComboInput } from "@/components/combo-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import {
+  MapContainer,
+  TileLayer,
+  VideoOverlay,
+} from "react-leaflet";
 import SelectArea from "@/components/select-area";
 import { Map } from "leaflet";
 
@@ -59,11 +60,6 @@ export default function PlaygroundPage() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <Marker position={[51.505, -0.09]}>
-                <Popup>
-                  A pretty CSS3 popup. <br /> Easily customizable.
-                </Popup>
-              </Marker>
               <SelectArea
                 onBoundsChange={(bounds) => {
                   console.log("Selected Area:", bounds);
@@ -73,6 +69,19 @@ export default function PlaygroundPage() {
                   color: "red",
                   dashArray: "5, 5",
                 }}
+              />
+              <VideoOverlay
+                bounds={[
+                  [32, -130],
+                  [13, -100],
+                ]}
+                url="https://www.mapbox.com/bites/00188/patricia_nasa.webm"
+                interactive={true}
+                zIndex={1000}
+                autoplay={true}
+                loop={true}
+                muted={true}
+                playsInline={true}
               />
             </MapContainer>
           </div>
