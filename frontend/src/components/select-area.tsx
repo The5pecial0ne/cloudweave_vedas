@@ -1,4 +1,3 @@
-import React from "react";
 import { useEffect } from "react";
 import { Rectangle, RectangleProps } from "react-leaflet";
 import { useSelectArea } from "../hooks/useSelectArea";
@@ -24,7 +23,7 @@ export default function SelectArea({
     if (rectangleBounds !== null) {
       onBoundsChange(rectangleBounds);
     }
-  }, [rectangleBounds, onBoundsChange]);
+  }, [rectangleBounds]);
 
   return (
     <>

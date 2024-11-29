@@ -6,11 +6,7 @@ import { ComboInput } from "@/components/combo-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  VideoOverlay,
-} from "react-leaflet";
+import { MapContainer, TileLayer, VideoOverlay } from "react-leaflet";
 import SelectArea from "@/components/select-area";
 import { Map } from "leaflet";
 
@@ -20,6 +16,10 @@ export default function PlaygroundPage() {
   const [lng, setLng] = useState<string | number>(77.7069);
   const [lat, setLat] = useState<string | number>(22.2723);
   const [zoom, setZoom] = useState(4.07);
+
+  const [selectedArea, setSelectedArea] = useState<
+    [[number, number], [number, number]] | null
+  >(null);
 
   useEffect(() => {
     if (map) {
@@ -56,13 +56,10 @@ export default function PlaygroundPage() {
               className="flex-1"
               ref={setMap}
             >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <SelectArea
                 onBoundsChange={(bounds) => {
-                  console.log("Selected Area:", bounds);
+                  setSelectedArea(bounds);
                 }}
                 keepRectangle={true}
                 options={{
@@ -70,19 +67,17 @@ export default function PlaygroundPage() {
                   dashArray: "5, 5",
                 }}
               />
-              <VideoOverlay
-                bounds={[
-                  [32, -130],
-                  [13, -100],
-                ]}
-                url="https://www.mapbox.com/bites/00188/patricia_nasa.webm"
-                interactive={true}
-                zIndex={1000}
-                autoplay={true}
-                loop={true}
-                muted={true}
-                playsInline={true}
-              />
+              {selectedArea && (
+                <VideoOverlay
+                  bounds={selectedArea}
+                  key={selectedArea.toString()}
+                  url="https://www.mapbox.com/bites/00188/patricia_nasa.webm"
+                  zIndex={1000}
+                  autoplay={true}
+                  loop={true}
+                  muted={true}
+                />
+              )}
             </MapContainer>
           </div>
 
