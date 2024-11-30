@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, VideoOverlay } from "react-leaflet";
 import SelectArea from "@/components/select-area";
-import { Map } from "leaflet";
+import { Map, VideoOverlay as LeafletVideoOverlay } from "leaflet";
+import Hls from "hls.js";
 
 export default function PlaygroundPage() {
   const [map, setMap] = useState<Map | null>(null);
+  const [videoRef, setVideoRef] = useState<LeafletVideoOverlay | null>(null);
 
   const [lng, setLng] = useState<string | number>(77.7069);
   const [lat, setLat] = useState<string | number>(22.2723);
@@ -30,6 +32,27 @@ export default function PlaygroundPage() {
       });
     }
   }, [map]);
+
+  useEffect(() => {
+    let video = videoRef?.getElement();
+    if (!video) return;
+
+    let videoSrc = "http://localhost:5000/video/tetris/output.m3u8";
+
+    if (Hls.isSupported()) {
+      let hls = new Hls();
+      hls.loadSource(videoSrc);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play();
+      });
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        console.error("Error", event, data);
+      })
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = videoSrc;
+    }
+  }, [videoRef]);
 
   return (
     <div className="h-screen">
@@ -63,8 +86,9 @@ export default function PlaygroundPage() {
                 }}
                 keepRectangle={true}
                 options={{
-                  color: "red",
                   dashArray: "5, 5",
+                  fillColor: "transparent",
+                  color: "cadetblue",
                 }}
               />
               {selectedArea && (
@@ -76,6 +100,7 @@ export default function PlaygroundPage() {
                   autoplay={true}
                   loop={true}
                   muted={true}
+                  ref={setVideoRef}
                 />
               )}
             </MapContainer>
