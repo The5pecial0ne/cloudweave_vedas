@@ -1,4 +1,3 @@
-from time import sleep
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 
@@ -20,8 +19,6 @@ def index():
 
 @app.route('/video/<string:video_dir>/<string:file_name>')
 def stream(video_dir: str, file_name: str):
-    if file_name == 'output.m3u8':
-        sleep(5)
     base_dir: str = './videos/'
     return send_from_directory(base_dir + video_dir, file_name)
 
