@@ -6,15 +6,22 @@ import { ComboInput } from "@/components/combo-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, VideoOverlay } from "react-leaflet";
+import {
+  MapContainer,
+  SVGOverlay,
+  TileLayer,
+  VideoOverlay,
+} from "react-leaflet";
 import SelectArea from "@/components/select-area";
 import { Map, VideoOverlay as LeafletVideoOverlay } from "leaflet";
 import Hls from "hls.js";
+import Loader from "./components/loader";
 
 export default function PlaygroundPage() {
   const [map, setMap] = useState<Map | null>(null);
   const [videoRef, setVideoRef] = useState<LeafletVideoOverlay | null>(null);
 
+  const [videoLoading, setVideoLoading] = useState(false);
   const [lng, setLng] = useState<string | number>(77.7069);
   const [lat, setLat] = useState<string | number>(22.2723);
   const [zoom, setZoom] = useState(4.07);
@@ -34,6 +41,7 @@ export default function PlaygroundPage() {
   }, [map]);
 
   useEffect(() => {
+    setVideoLoading(true);
     let video = videoRef?.getElement();
     if (!video) return;
 
@@ -43,16 +51,35 @@ export default function PlaygroundPage() {
       let hls = new Hls();
       hls.loadSource(videoSrc);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        setVideoLoading(false);
         video.play();
       });
-      hls.on(Hls.Events.ERROR, function (event, data) {
+      hls.on(Hls.Events.ERROR, function(event, data) {
+        setVideoLoading(false);
         console.error("Error", event, data);
-      })
+      });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = videoSrc;
     }
   }, [videoRef]);
+
+  function halfBound(bounds: [[number, number], [number, number]]): [[number, number], [number, number]] {
+    const [[x1, y1], [x2, y2]] = bounds;
+
+    const centerX = (x1 + x2) / 2;
+    const centerY = (y1 + y2) / 2;
+
+    const halfWidth = (x2 - x1) / 4;
+    const halfHeight = (y2 - y1) / 4;
+
+    const newX1 = centerX - halfWidth;
+    const newY1 = centerY - halfHeight;
+    const newX2 = centerX + halfWidth;
+    const newY2 = centerY + halfHeight;
+
+    return [[newX1, newY1], [newX2, newY2]];
+  }
 
   return (
     <div className="h-screen">
@@ -87,21 +114,31 @@ export default function PlaygroundPage() {
                 keepRectangle={true}
                 options={{
                   dashArray: "5, 5",
+                  weight: 2,
                   fillColor: "transparent",
                   color: "cadetblue",
                 }}
               />
               {selectedArea && (
-                <VideoOverlay
-                  bounds={selectedArea}
-                  key={selectedArea.toString()}
-                  url="https://www.mapbox.com/bites/00188/patricia_nasa.webm"
-                  zIndex={1000}
-                  autoplay={true}
-                  loop={true}
-                  muted={true}
-                  ref={setVideoRef}
-                />
+                <>
+                  <SVGOverlay
+                    bounds={halfBound(selectedArea)}
+                    key={selectedArea.toString()}
+                    opacity={0.9}
+                  >
+                    {videoLoading && <Loader />}
+                  </SVGOverlay>
+                  <VideoOverlay
+                    bounds={selectedArea}
+                    key={selectedArea.toString()}
+                    url=""
+                    zIndex={1000}
+                    autoplay={true}
+                    loop={true}
+                    muted={true}
+                    ref={setVideoRef}
+                  />
+                </>
               )}
             </MapContainer>
           </div>
