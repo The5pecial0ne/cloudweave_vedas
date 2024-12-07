@@ -5,81 +5,13 @@ import { Label } from "@/components/ui/label";
 import { ComboInput } from "@/components/combo-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import {
-  MapContainer,
-  SVGOverlay,
-  TileLayer,
-  VideoOverlay,
-} from "react-leaflet";
-import SelectArea from "@/components/select-area";
-import { Map, VideoOverlay as LeafletVideoOverlay } from "leaflet";
-import Hls from "hls.js";
-import Loader from "./components/loader";
+import { useState } from "react";
+import MainMap from "./components/map";
 
 export default function PlaygroundPage() {
-  const [map, setMap] = useState<Map | null>(null);
-  const [videoRef, setVideoRef] = useState<LeafletVideoOverlay | null>(null);
-
-  const [videoLoading, setVideoLoading] = useState(false);
   const [lng, setLng] = useState<string | number>(77.7069);
   const [lat, setLat] = useState<string | number>(22.2723);
   const [zoom, setZoom] = useState(4.07);
-
-  const [selectedArea, setSelectedArea] = useState<
-    [[number, number], [number, number]] | null
-  >(null);
-
-  useEffect(() => {
-    if (map) {
-      map.on("move", () => {
-        setLat(map.getCenter().lat.toFixed(4));
-        setLng(map.getCenter().lng.toFixed(4));
-        setZoom(map.getZoom());
-      });
-    }
-  }, [map]);
-
-  useEffect(() => {
-    setVideoLoading(true);
-    let video = videoRef?.getElement();
-    if (!video) return;
-
-    let videoSrc = "http://localhost:5000/video/tetris/output.m3u8";
-
-    if (Hls.isSupported()) {
-      let hls = new Hls();
-      hls.loadSource(videoSrc);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        setVideoLoading(false);
-        video.play();
-      });
-      hls.on(Hls.Events.ERROR, function(event, data) {
-        setVideoLoading(false);
-        console.error("Error", event, data);
-      });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = videoSrc;
-    }
-  }, [videoRef]);
-
-  function halfBound(bounds: [[number, number], [number, number]]): [[number, number], [number, number]] {
-    const [[x1, y1], [x2, y2]] = bounds;
-
-    const centerX = (x1 + x2) / 2;
-    const centerY = (y1 + y2) / 2;
-
-    const halfWidth = (x2 - x1) / 4;
-    const halfHeight = (y2 - y1) / 4;
-
-    const newX1 = centerX - halfWidth;
-    const newY1 = centerY - halfHeight;
-    const newX2 = centerX + halfWidth;
-    const newY2 = centerY + halfHeight;
-
-    return [[newX1, newY1], [newX2, newY2]];
-  }
 
   return (
     <div className="h-screen">
@@ -99,48 +31,11 @@ export default function PlaygroundPage() {
 
         <div className="flex-1 flex p-8 py-6 gap-8">
           <div className="w-full flex-1 overflow-hidden rounded-lg bg-white relative flex">
-            <MapContainer
-              center={[22.2723, 77.7069]}
-              zoom={5}
-              scrollWheelZoom={true}
-              className="flex-1"
-              ref={setMap}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <SelectArea
-                onBoundsChange={(bounds) => {
-                  setSelectedArea(bounds);
-                }}
-                keepRectangle={true}
-                options={{
-                  dashArray: "5, 5",
-                  weight: 2,
-                  fillColor: "transparent",
-                  color: "cadetblue",
-                }}
-              />
-              {selectedArea && (
-                <>
-                  <SVGOverlay
-                    bounds={halfBound(selectedArea)}
-                    key={selectedArea.toString()}
-                    opacity={0.9}
-                  >
-                    {videoLoading && <Loader />}
-                  </SVGOverlay>
-                  <VideoOverlay
-                    bounds={selectedArea}
-                    key={selectedArea.toString()}
-                    url=""
-                    zIndex={1000}
-                    autoplay={true}
-                    loop={true}
-                    muted={true}
-                    ref={setVideoRef}
-                  />
-                </>
-              )}
-            </MapContainer>
+            <MainMap
+              onLngChange={setLng}
+              onLatChange={setLat}
+              onZoomChange={setZoom}
+            />
           </div>
 
           <Tabs defaultValue="complete" className="flex-shrink-0">
