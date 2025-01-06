@@ -15,8 +15,8 @@ output_directory = "./input_frames"
 os.makedirs(output_directory, exist_ok=True)
 
 def fetch_images(bbox, width, height, start_time, end_time):
-    print(start_time, end_time)
-        
+    # print(start_time, end_time)
+
     labels = {
         1: "2019-05-14T00:15:00.000Z",
         2: "2019-05-14T00:45:00.000Z",
@@ -42,15 +42,15 @@ def fetch_images(bbox, width, height, start_time, end_time):
             break
         else:
             end_index += 1
-    print(start_index, end_index)
-    
+    # print(start_index, end_index)
+
     # formatted_start_time = datetime.fromisoformat(start_time)
     # formatted_end_time = datetime.fromisoformat(end_time)
     # print(formatted_start_time, formatted_end_time)
     img_num = 0
     # current_time = formatted_start_time
-    
-    while start_index <= end_index:
+
+    while start_index < end_index:
         params = {
             "service": "WMS",
             "version": "1.1.1",
@@ -67,17 +67,17 @@ def fetch_images(bbox, width, height, start_time, end_time):
             "map_resolution":96,
             "transparent":True
         }
-                
+
         # Send the request
         response = requests.get(base_url, params=params)
-        print('URL hit:' , response.url)
+        # print('URL hit:' , response.url)
         if response.status_code == 200:
             filename = os.path.join(output_directory, f"{img_num}.png")
             with open(filename, "wb") as f:
                 f.write(response.content)
-        else:
-            print(f"Failed to fetch image for time {start_index}. Status code: {response.status_code}")
-        
+        # else:
+            # print(f"Failed to fetch image for time {start_index}. Status code: {response.status_code}")
+
         img_num += 1
         start_index += 1
 
