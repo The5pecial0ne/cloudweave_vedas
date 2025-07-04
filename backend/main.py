@@ -1,26 +1,40 @@
-from flask import Flask, send_from_directory, render_template
-from flask_cors import CORS
+# backend/main.py
 
-app = Flask(__name__)
-CORS(app)
+import sys
+from pathlib import Path
+import uvicorn
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
-@app.after_request
-def add_header(response):
-    response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+# 1) ensure Python can see your RIFE-Cloudweave folder
+REPO_ROOT = Path(__file__).parent.parent
+RIFE_API  = REPO_ROOT / "Cloudweave Runner" / "RIFE-Cloudweave-main"
+sys.path.append(str(RIFE_API))
 
-@app.route('/')
-def index():
-    """Serve the HTML page with the video player."""
-    return render_template('index.html')
+# 2) import the FastAPI app you defined
+from get_wms_img_updated import app
 
-@app.route('/video/<string:video_dir>/<string:file_name>')
-def stream(video_dir: str, file_name: str):
-    base_dir: str = './videos/'
-    return send_from_directory(base_dir + video_dir, file_name)
+# 3) mount the videos directory first (so /videos is matched before /)
+VIDEOS_DIR = Path(__file__).parent / "videos"
+VIDEOS_DIR.mkdir(exist_ok=True)
+app.mount(
+    "/videos",
+    StaticFiles(directory=str(VIDEOS_DIR)),
+    name="videos"
+)
+
+# 4) mount your HTML/CSS/JS frontend at the root
+FRONTEND_DIR = REPO_ROOT / "frontend"
+app.mount(
+    "/",
+    StaticFiles(directory=str(FRONTEND_DIR), html=True),
+    name="static"
+)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )

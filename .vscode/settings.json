@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./Cloudweave Runner/RIFE-Cloudweave-main"
+    ]
+}

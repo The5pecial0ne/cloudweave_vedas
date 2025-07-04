@@ -1,13 +1,49 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Satellite Interpolation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Satellite Frame Interpolation</h1>
+    <form id="interp-form">
+      <div class="form-group">
+        <label for="lonMin">Longitude Min:</label>
+        <input type="number" id="lonMin" step="any" required />
+        <label for="latMin">Latitude Min:</label>
+        <input type="number" id="latMin" step="any" required />
+      </div>
+      <div class="form-group">
+        <label for="lonMax">Longitude Max:</label>
+        <input type="number" id="lonMax" step="any" required />
+        <label for="latMax">Latitude Max:</label>
+        <input type="number" id="latMax" step="any" required />
+      </div>
+      <div class="form-group">
+        <label for="start">Start Time:</label>
+        <input type="datetime-local" id="start" required />
+        <label for="end">End Time:</label>
+        <input type="datetime-local" id="end" required />
+      </div>
+      <div class="form-group">
+        <label for="zoom">Zoom Level:</label>
+        <input type="number" id="zoom" value="7" min="0" required />
+        <label for="workers">Worker Threads:</label>
+        <input type="number" id="workers" value="8" min="1" required />
+      </div>
+      <button type="button" id="start-btn">Interpolate</button>
+    </form>
+
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="progress-text"></p>
+    <video id="output-video" controls></video>
+  </div>
+
+  <script src="app.js"></script>
+</body>
 </html>
